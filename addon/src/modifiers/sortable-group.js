@@ -16,6 +16,7 @@ import { defaultA11yAnnouncementConfig } from '../utils/defaults';
 import { next, schedule, scheduleOnce, later } from '@ember/runloop';
 import { inject as service } from '@ember/service';
 import { registerDestructor, isDestroyed } from '@ember/destroyable';
+import { getGap } from '../utils/css-calculation';
 
 const NO_MODEL = {};
 
@@ -652,6 +653,8 @@ export default class SortableGroupModifier extends Modifier {
       axis = this.firstItemPosition;
     }
 
+    const gap = getGap(this.element);
+
     let direction = this.direction;
 
     let position = 0;
@@ -689,23 +692,24 @@ export default class SortableGroupModifier extends Modifier {
         position += item.spacing * 2;
       }
 
-      let dimension;
+      let dimension, gapSize;
 
       if (direction === 'grid') {
         dimension = 'width';
+        gapSize = gap['horizontal'];
 
         if (item.height > maxPrevHeight) {
-          maxPrevHeight = item.height;
+          maxPrevHeight = item.height + gap['vertical'];
         }
-      }
-      if (direction === 'x') {
+      } else if (direction === 'x') {
+        gapSize = gap['horizontal'];
         dimension = 'width';
-      }
-      if (direction === 'y') {
+      } else if (direction === 'y') {
+        gapSize = gap['vertical'];
         dimension = 'height';
       }
 
-      position += item[dimension];
+      position += item[dimension] + gapSize;
     });
   }
 

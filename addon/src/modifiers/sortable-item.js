@@ -894,7 +894,7 @@ export default class SortableItemModifier extends Modifier {
     let width = el.offsetWidth;
     let elStyles = getComputedStyle(el);
 
-    width += parseInt(elStyles.marginLeft) + parseInt(elStyles.marginRight); // equal to jQuery.outerWidth(true)
+    width += parseFloat(elStyles.marginLeft) + parseFloat(elStyles.marginRight);
 
     width += getBorderSpacing(el).horizontal;
 
@@ -910,15 +910,17 @@ export default class SortableItemModifier extends Modifier {
     let el = this.element;
     let height = el.offsetHeight;
     let elStyles = getComputedStyle(el);
+    let parentDisplay = getComputedStyle(el.parentElement).display;
 
-    // This is needed atm only for grid, to fix jumping on drag-start.
-    // In test-app it looks like there is a side-effect when we activate also for direction vertical.
-    // If any user will anytime report a jumping in vertical direction, we should activate for every direction and fix our test-app
-    if (this.direction === 'grid') {
-      height += parseFloat(elStyles.marginTop);
+    let marginTop = parseFloat(elStyles.marginTop);
+    let marginBottom = parseFloat(elStyles.marginBottom);
+
+    // Account for collapsing margins in CSS flow layout
+    if (parentDisplay == 'block') {
+      height += Math.max(marginTop, marginBottom);
+    } else {
+      height += marginTop + marginBottom;
     }
-
-    height += parseFloat(elStyles.marginBottom);
 
     height += getBorderSpacing(el).vertical;
 
